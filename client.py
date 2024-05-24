@@ -1,7 +1,22 @@
 import socket
 
-
+# Что такое сокет?
 def encoder(data: str) -> str:
+    '''
+    Функция принимает строку data и кодирует её в более длинную строку с использованием кода Хэмминга.
+    
+    Аргументы:
+        bits - список битов, где каждый символ строки записан в двоичном виде;
+        tmp - проверочный бит;
+        result - массив с битами и проверочными битами кода Хэмминга.
+    
+    Принцип работы:
+        Сначала строка data преобразуется в список битов bits, где каждый символ строки преобразуется в его двоичное представление.
+        Далее определяется минимальное количество проверочных битов tmp, которые нужно добавить для корректной кодировки данных.
+        Создаётся массив result, в который помещаются биты и проверочные биты кода Хэмминга.
+        Функция возвращает закодированную строку в виде строки битов.
+    '''
+
     bits = [int(bit) for bit in data]
     tmp = 0
     while 2 ** tmp < len(bits) + tmp + 1:
@@ -26,16 +41,52 @@ def encoder(data: str) -> str:
 
 
 def string_to_binary(string):
+    '''
+    Функция принимает строку string и конвертирует каждый символ в его двоичное представление, в виде строки из нулей и единиц.
+    
+    Аргументы:
+        binary_result - массив для хранения посимвольно закодированной строки.
+
+    Принцип работы:
+        Каждый символ строки преобразуется в двоичное представление с помощью format(ord(char), '08b'), где ord(char) возвращает числовое значение символа.
+    '''
+
     binary_str = ' '.join(format(ord(char), '08b') for char in string)
     return binary_str
 
 def connect_binary_strings(binary_str):
+    '''
+    Функция принимает строку binary_str, которая содержит двоичные представления символов, разделённые пробелами.
+
+    Аргументы:
+        binary_list - разделенное двоичное представление строки;
+        connect_string - объединенное двоичное представление входной строки.
+
+    Принцип работы:
+        Сначала строка binary_str разделяется на отдельные двоичные представления с помощью .split().
+        Затем эти отдельные двоичные представления объединяются в одну строку без пробелов с помощью .join() и возвращаются как результат.
+    '''
+
     binary_list = binary_str.split()
     connect_string = ''.join(binary_list)
     return connect_string
 
 
 def register_user(username):
+    '''
+    Функция регистрирует пользователя на сервере.
+
+    Аргументы:
+        socket_client - сокет;
+        response - id пользователя.
+
+    Принцип работы:
+        Создаётся сокет socket_client, который подключается к серверу.
+        Отправляется запрос на сервер.
+        Получается ответ от сервера и проверяется, занят ли выбранный username.
+
+    '''
+
     socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     socket_client.connect(('127.0.0.1', 5555))
     socket_client.send(f"register:{username}".encode('utf-8'))
@@ -50,6 +101,21 @@ def register_user(username):
         return response
 
 def send_message(sender_id, receiver_name, message):
+    '''
+    Функция отправляет сообщение от отправителя к получателю.
+
+    Аргументы:
+        acc - конвертироанная строка;
+        acc2 - объединенная конвертированная строка;
+        encoded_message - закордированная строка с помощью алгоритма Хэмминга.
+
+    Принцип работы:
+        Сообщение сначала конвертируется в двоичную строку с помощью функции string_to_binary, затем объединяется без пробелов с помощью connect_binary_strings.
+        Полученная строка битов кодируется с использованием функции encoder.
+        Создаётся сокет.
+        Отправляется запрос на сервер в формате.
+        Получается ответ от сервера и выводится на экран.
+    '''
 
     acc = string_to_binary(message)
     acc2 = connect_binary_strings(acc)
@@ -70,8 +136,8 @@ if __name__ == "__main__":
         if user_id is None:
             username = input("Enter a different username: ")
     while True:
-        receiver_name = input("Enter receiver's username (or 'exit' to quit): ")
-        if receiver_name == 'exit' or receiver_name == 'exit ':
+        receiver_name = input("Enter receiver's username or 'exit': ")
+        if receiver_name == 'exit':
             break
         message = input("Enter message: ")
         send_message(user_id, receiver_name, message)
